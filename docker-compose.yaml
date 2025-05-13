@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    # Mongo doesn't require a Dockerfile, so no build needed here
+
+  backend:
+    build:
+      context: ./backend  # Path to the backend directory where the Dockerfile is located
+      dockerfile: Dockerfile  # If the Dockerfile is named something other than the default "Dockerfile", you can specify it here
+    container_name: backend
+    depends_on:
+      - mongo
+    ports:
+      - "8080:8080"
+    environment:
+      MONGO_CONN_STR: mongodb://mongo:27017/todo  # Connection string to the mongo service
+
+  frontend:
+    build:
+      context: ./frontend  # Path to the frontend directory where the Dockerfile is located
+      dockerfile: Dockerfile  # Specify Dockerfile if needed
+    container_name: frontend
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
