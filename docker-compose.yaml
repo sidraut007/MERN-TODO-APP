@@ -29,3 +29,6 @@ services:
       - backend
     ports:
       - "3000:3000"
+    environment:
+      NODE_OPTIONS: --openssl-legacy-provider
+      REACT_APP_BACKEND_URL: http://localhost:8080/api/tasks  # API URL for the frontend to connect to the backend

@@ -1,20 +1,23 @@
-# Use the official Node.js 14 image as a base image
-FROM node:14
+# Use the official Node.js 18 image as a base image
+FROM node:18
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
-# Copy the package.json and package-lock.json files to the container
+# Copy dependency files
 COPY package*.json ./
 
-# Install the application's dependencies inside the container
+# Install dependencies
 RUN npm install
 
-# Copy the rest of the application code to the container
+# Copy the rest of the app code
 COPY . .
 
-# Exposing Port to the container
+# Expose the port your app runs on
 EXPOSE 3000
 
-# Specify the command to run when the container starts
-CMD [ "npm", "start" ]
+# Fix for OpenSSL 3 incompatibility with Webpack used in react-scripts
+ENV NODE_OPTIONS=--openssl-legacy-provider
+
+# Start the app
+CMD ["npm", "start"]
