@@ -1,0 +1,19 @@
+# kind.yaml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+  - role: worker
+
+
+
+# Steps to create a kind cluster:
+# 1. Create a kind cluster 
+          # kind create cluster --config kind.yaml --name sparta-cluster
+
+# 2. Verify the cluster is running 
+          # kubectl cluster-info
+          # kubectl get nodes
+
+# 3. How to delete the cluster:
+          # kind delete cluster --name sparta-cluster
