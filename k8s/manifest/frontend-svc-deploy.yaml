@@ -28,9 +28,10 @@ spec:
         imagePullPolicy: Always
         env:
           - name: REACT_APP_BACKEND_URL
-            value: "localhost:8080" # assuming backend service is on port 8080
+            value: "http://backend:8080/api/tasks" # assuming backend service is on port 8080 
+
         ports:
-        - containerPort: 3000
+        - containerPort: 80
 ---
 apiVersion: v1
 kind: Service
@@ -39,7 +40,7 @@ metadata:
   namespace: workshop
 spec:
   ports:
-  - port: 3000
+  - port: 80
     protocol: TCP
   type: ClusterIP
   selector:

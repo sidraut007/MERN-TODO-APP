@@ -1,20 +1,19 @@
-# Use the official Node.js 14 image as a base image
-FROM node:14
+# Stage 1: Build the React app
+FROM node:18-alpine as build
 
-# Set the working directory in the container
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Copy the package.json and package-lock.json files to the container
-COPY package*.json ./
-
-# Install the application's dependencies inside the container
-RUN npm install
-
-# Copy the rest of the application code to the container
 COPY . .
 
-# Exposing Port to the container
-EXPOSE 3000
+ENV NODE_OPTIONS=--openssl-legacy-provider
 
-# Specify the command to run when the container starts
-CMD [ "npm", "start" ]
+RUN npm install && npm run build
+
+# Stage 2: Serve with Nginx
+FROM nginx:alpine
+
+COPY --from=build /app/build /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
