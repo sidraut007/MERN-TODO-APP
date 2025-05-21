@@ -1,36 +1,20 @@
-# -------------------------
-# Builder Stage
-# -------------------------
-FROM node:18 AS builder
+# Use the official Node.js 14 image as a base image
+FROM node:14
 
-WORKDIR /app
+# Set the working directory in the container
+WORKDIR /usr/src/app
 
-# Copy only dependency files for layer caching
+# Copy the package.json and package-lock.json files to the container
 COPY package*.json ./
 
-# Install all dependencies
+# Install the application's dependencies inside the container
 RUN npm install
 
-# Copy the rest of the source code
+# Copy the rest of the application code to the container
 COPY . .
 
-# -------------------------
-# Production Stage
-# -------------------------
-FROM node:18-slim
-
-WORKDIR /app
-
-# Set environment to production
-ENV NODE_ENV=production
-
-# Copy only production dependencies and compiled code
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app ./
-
-# Expose the backend port
+# Expose Port to the container
 EXPOSE 8080
 
-# Start the app
-CMD ["node", "index.js"]
+# Specify the command to run when the container starts
+CMD [ "node", "index.js" ]
