@@ -17,3 +17,11 @@ nodes:
 
 # 3. How to delete the cluster:
           # kind delete cluster --name sparta-cluster
+
+# 4. how to check the context:
+          # kubectl config get-contexts
+          # kubectl cluster-info --context kind-sparta-cluster
+# 5. How to check images inside the nodes:
+          # docker exec -it sparta-cluster-worker crictl images
+          # docker exec -it sparta-cluster-worker crictl rmi docker.io/sidraut007/todo-backend:4
+          # docker exec -it sparta-cluster-worker crictl rmi docker.io/sidraut007/todo-frontend:4

@@ -375,6 +375,20 @@ This command will download the sonarqube:latest Docker image from Docker Hub if 
 This will start the SonarQube server, and you should be able to access it using the provided URL. If you're running Docker on a remote server or a different port, replace localhost with the appropriate hostname or IP address and adjust the port accordingly.
 
 ---
+## Argocd Installation:
+  - Create argocd Namespace
+  ```bash 
+    kubectl create namespace argocd
+    kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+    kubectl port-forward svc/argocd-server -n argocd 8000:443
+```
+  - Now you can access the Argo CD UI at: https://localhost:8000
+  
+  - Get Admin Password
+    ```bash
+      kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d
+    ```
+---
 ## Phase2_Git-Repo-Setup
 ### Steps to create a private Git repository, generate a personal access token, connect to the repository, and push code to it:
 ### 1. Create a Private Git Repository:
