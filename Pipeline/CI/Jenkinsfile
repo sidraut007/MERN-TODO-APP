@@ -1,0 +1,111 @@
+pipeline {
+    agent any
+
+    tools {
+        nodejs 'node18'
+    }
+
+    environment {
+        SONAR_HOST_URL = 'http://sonarqube:9000'   # Update with your SonarQube URL
+        SCANNER_HOME = tool 'sonar-scanner'
+        DOCKER_IMAGE_FE = 'sidraut007/todo-frontend'
+        DOCKER_IMAGE_BE = 'sidraut007/todo-backend'
+        IMAGE_TAG = "${BUILD_NUMBER}"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Cloning the GitHub Repo...'
+                git branch: 'main', url: 'https://github.com/sidraut007/MERN-TODO-APP.git'
+            }
+        }
+
+        stage('Lint Code') {
+            steps {
+                dir('backend') {
+                    sh 'npm run lint || true'
+                }
+                dir('frontend') {
+                    sh 'npm run lint || true'
+                }
+            }
+        }
+
+        stage('File System Scan') {
+            steps {
+                sh 'trivy fs --scanners vuln --timeout 5m --format table -o trivy-fs-report.html .'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonar') {
+                    sh '''
+                        ${SCANNER_HOME}/bin/sonar-scanner \
+                        -Dsonar.projectName=mern-app \
+                        -Dsonar.projectKey=mern-app \
+                        -Dsonar.sources=. \
+                        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+                    '''
+                }
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                echo 'Installing backend dependencies...'
+                dir('backend') {
+                    sh 'npm install'
+                }
+
+                echo 'Installing frontend dependencies...'
+                dir('frontend') {
+                    sh 'npm install'
+                }
+            }
+        }
+
+
+        stage('Build Docker Images') {
+            steps {
+                sh """
+                    docker build -t ${DOCKER_IMAGE_FE}:${IMAGE_TAG} ./frontend
+                    docker build -t ${DOCKER_IMAGE_BE}:${IMAGE_TAG} ./backend
+                """
+            }
+        }
+
+        stage('Docker Image Scan') {
+            steps {
+                sh """
+                    trivy image ${DOCKER_IMAGE_FE}:${IMAGE_TAG}
+                    trivy image ${DOCKER_IMAGE_BE}:${IMAGE_TAG}
+                """
+            }
+        }
+
+        stage('Push Docker Images') {
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                        sh """    
+                            docker push ${DOCKER_IMAGE_FE}:${IMAGE_TAG}
+                            docker push ${DOCKER_IMAGE_BE}:${IMAGE_TAG}
+                        """
+                    }
+                }
+            }
+        }
+
+    }
+
+    post {
+        success {
+            echo '✅ Pipeline completed successfully.'
+        }
+        failure {
+            echo '❌ Pipeline failed.'
+        }
+    }
+}

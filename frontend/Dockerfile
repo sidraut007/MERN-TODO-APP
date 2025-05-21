@@ -1,23 +1,27 @@
-# Use the official Node.js 18 image as a base image
-FROM node:18
+# Build stage
+FROM node:18 AS builder
 
-# Set the working directory in the container
 WORKDIR /usr/src/app
-
-# Copy dependency files
-COPY package*.json ./
-
-# Install dependencies
-RUN npm install
-
-# Copy the rest of the app code
-COPY . .
-
-# Expose the port your app runs on
-EXPOSE 3000
-
-# Fix for OpenSSL 3 incompatibility with Webpack used in react-scripts
 ENV NODE_OPTIONS=--openssl-legacy-provider
 
-# Start the app
-CMD ["npm", "start"]
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+# Production stage
+FROM node:18-slim
+
+WORKDIR /usr/src/app
+ENV NODE_OPTIONS=--openssl-legacy-provider
+
+# Install a static server to serve the build
+RUN npm install -g serve
+
+# Copy only the build output
+COPY --from=builder /usr/src/app/build ./build
+
+EXPOSE 3000
+
+# Use serve to serve the build directory
+CMD ["serve", "-s", "build"]

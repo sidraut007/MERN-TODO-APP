@@ -32,3 +32,5 @@ services:
     environment:
       NODE_OPTIONS: --openssl-legacy-provider
       REACT_APP_BACKEND_URL: http://localhost:8080/api/tasks  # API URL for the frontend to connect to the backend
+      
+      #Note:- Here we are using localhost because the frontend is running on the host machine and needs to access the backend service
