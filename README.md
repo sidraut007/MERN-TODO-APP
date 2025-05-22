@@ -1,4 +1,7 @@
 # MERN TODO DevSecops Implementation
+- A TODO application is a simple yet powerful productivity tool that allows users to create, read, update, and delete (CRUD) tasks or items they need to accomplish. It serves as a practical project to demonstrate the integration of various technologies and practices — from frontend development to backend APIs, databases, and DevSecOps principles.
+
+![Login diagram](images/home.png)
 
 ## Project Directory Structure
 
@@ -77,6 +80,7 @@ Post Actions
     ```bash
       kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d
     ```
+    ![Login diagram](images/ArgoCD.png)
 ---
 ## Phase1_Create Vms
 ### Step 1: Sign in and Navigate to EC2
