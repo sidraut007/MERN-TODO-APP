@@ -7,14 +7,10 @@ services:
     container_name: sonarqube
     ports:
       - "9000:9000"
-
-  nexus:
-    image: sonatype/nexus3
-    container_name: nexus
-    ports:
-      - "8081:8081"
     volumes:
-      - nexus-data:/nexus-data
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
 
   jenkins:
     image: sidraut007/jenkins
@@ -28,5 +24,7 @@ services:
     user: root  # needed to run Docker commands
 
 volumes:
-  nexus-data:
   jenkins_home:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:

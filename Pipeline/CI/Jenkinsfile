@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        SONAR_HOST_URL = 'http://sonarqube:9000'   # Update with your SonarQube URL
+        SONAR_HOST_URL = 'http://sonarqube:9000'   //Update with your SonarQube URL
         SCANNER_HOME = tool 'sonar-scanner'
         DOCKER_IMAGE_FE = 'sidraut007/todo-frontend'
         DOCKER_IMAGE_BE = 'sidraut007/todo-backend'

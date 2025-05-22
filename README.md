@@ -484,6 +484,29 @@ By following these steps, you'll be able to create a private Git repository, con
 - It provides a convenient way to manage Docker containers directly from Jenkins Pipelines.
 
 ### Pipeline
+- ✅ Export the kubeconfig from your local machine
+  - Run this command:
+```bash
+          kind get kubeconfig --name todo-devsecops > kind-kubeconfig.yaml
+      ```
+- ✅ Upload Kubeconfig to Jenkins
+
+```bash
+  Open Jenkins → Manage Jenkins → Credentials 
+   ↓
+  Select (global) or the relevant domain → click Add Credentials
+   ↓
+  Choose:
+  Kind: Secret file
+   ↓
+  File: Upload the kind-kubeconfig.yaml you just exported
+   ↓
+  ID: k8s-cred
+   ↓
+  Description: KinD kubeconfig for MERN app
+```
+---
+![Login diagram](images/pipeline.png)
 ``` bash
 pipeline {
     agent any
@@ -493,7 +516,7 @@ pipeline {
     }
 
     environment {
-        SONAR_HOST_URL = 'http://sonarqube:9000'   # Update with your SonarQube URL
+        SONAR_HOST_URL = 'http://sonarqube:9000'   //Update with your SonarQube URL
         SCANNER_HOME = tool 'sonar-scanner'
         DOCKER_IMAGE_FE = 'sidraut007/todo-frontend'
         DOCKER_IMAGE_BE = 'sidraut007/todo-backend'
@@ -501,6 +524,13 @@ pipeline {
     }
 
     stages {
+        stage('Clean Workspace') {
+            steps {
+                echo '🧹 Cleaning up workspace...'
+                cleanWs()
+            }
+        }
+
         stage('Checkout') {
             steps {
                 echo 'Cloning the GitHub Repo...'
@@ -539,7 +569,7 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
+        /*stage('Install Dependencies') {
             steps {
                 echo 'Installing backend dependencies...'
                 dir('backend') {
@@ -551,7 +581,7 @@ pipeline {
                     sh 'npm install'
                 }
             }
-        }
+        }*/
 
 
         stage('Build Docker Images') {
@@ -589,11 +619,16 @@ pipeline {
             steps {
                 withKubeConfig(
                     credentialsId: 'k8s-cred',
-                    namespace: 'webapps',
+                    namespace: 'workshop',
                     clusterName: 'kubernetes',
-                    serverUrl: 'https://172.31.0.31:6443'
+                    serverUrl: 'https://host.docker.internal:54450'  // Kubernetes API server as im using kind cluster so this is the url 
                 ) {
-                    sh 'kubectl apply -f deployment-service.yml'
+                    dir('k8s/manifest/') {
+                        sh '''
+                        kubectl apply -f secret.yaml
+                        kubectl apply -f .
+                        '''
+                    }
                 }
             }
         }
@@ -602,12 +637,12 @@ pipeline {
             steps {
                 withKubeConfig(
                     credentialsId: 'k8s-cred',
-                    namespace: 'webapps',
+                    namespace: 'workshop',
                     clusterName: 'kubernetes',
-                    serverUrl: 'https://172.31.0.31:6443'
+                    serverUrl: 'https://host.docker.internal:54450' // Kubernetes Controlplane/API server as im using kind cluster so this is the url 
                 ) {
-                    sh 'kubectl get pods -n webapps'
-                    sh 'kubectl get svc -n webapps'
+                    sh 'kubectl get pods -n workshop'
+                    sh 'kubectl get svc -n workshop'
                 }
             }
         }
