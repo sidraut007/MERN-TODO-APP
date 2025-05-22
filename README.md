@@ -50,6 +50,20 @@ Post Actions
 
 ```
 ---
+## 📝 Important:(When using Windows with Docker Desktop and kind cluster, your cluster runs inside a Docker)
+  - If you're port-forwarding your frontend to localhost, you must also port-forward your backend service to localhost.
+  - Otherwise, the frontend won't be able to communicate with the backend because it's still isolated inside the cluster.
+  - Port-forwarding exposes services running inside the Kubernetes cluster to your local machine (localhost).
+  - Without forwarding both services, your frontend (on localhost) won't be able to reach the backend (still inside the cluster network).
+
+```bash
+    # Port-forward the frontend service to localhost:80
+    kubectl port-forward service/frontend 80:80
+
+    # Port-forward the backend service to localhost:8080
+    kubectl port-forward service/backend 8080:8080
+```
+---
 ## Phase1_Create Vms
 ### Step 1: Sign in and Navigate to EC2
 - Go to https://aws.amazon.com/console/ and sign in with your AWS account.
